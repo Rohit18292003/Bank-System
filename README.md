@@ -38,3 +38,32 @@ A production-ready Banking System backend developed using Java and Spring Boot f
 - Git & GitHub
 
 ## Project Structure
+## Project Structure
+
+
+src
+├── controller
+├── service
+├── repository
+├── entity
+├── dto
+├── mapper
+├── exception
+├── config
+├── security
+└── util## API Endpoints
+
+- User APIs
+- Account APIs
+- Transaction APIs
+- Authentication APIs
+
+## Database
+
+PostgreSQL
+
+## Testing
+
+- Unit Testing
+- Service Layer Testing
+- Repository Testing
