@@ -43,7 +43,6 @@ public class UserServiceImp implements UserService {
 		UserEntity resp = userRepo.findById(id)
 				.orElseThrow(() -> new ResourceNotFoundException("User not found wit id " + id));
 		return userMapper.toDTO(resp);
-
 	}
 
 	@Override
@@ -58,7 +57,6 @@ public class UserServiceImp implements UserService {
 		customer.setRole(newUserData.getRole());
 
 		UserEntity updatedUser = userRepo.save(customer);
-
 		return ResponseEntity.ok(updatedUser);
 	}
 

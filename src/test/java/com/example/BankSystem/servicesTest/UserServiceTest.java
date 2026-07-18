@@ -45,8 +45,7 @@ class UserServiceTest {
 	@BeforeEach
 	void setUp() {
 		user1 = UserEntity.builder().id(1L).name("Rohit Birajdar").email("birajdarrohit56@gmail.com")
-				.mobile("9067792489").active(false)
-				.role(Role.CUSTOMER).build();
+				.mobile("9067792489").active(false).role(Role.CUSTOMER).build();
 		user2 = UserEntity.builder().id(2L).name("Jay").email("jay@123").mobile("9067862477").active(true)
 				.role(Role.CUSTOMER).build();
 		newUserRequest = UserRequestDTO.builder().name("Rohit Birajdar").email("birajdarrohit56@gmail.com")
@@ -65,11 +64,11 @@ class UserServiceTest {
 		when(userRepo.existsByEmail(newUserRequest.getEmail())).thenReturn(false);
 		when(userRepo.existsByMobile(newUserRequest.getMobile())).thenReturn(false);
 		when(userMapper.toEntity(newUserRequest)).thenReturn(user1);
-		
+
 		when(userRepo.save(user1)).thenReturn(user1);
 
 		// act
- ResponseEntity<?> result = userService.createUser(newUserRequest);
+		ResponseEntity<?> result = userService.createUser(newUserRequest);
 
 		// result
 		Assertions.assertEquals(HttpStatus.CREATED, result.getStatusCode());

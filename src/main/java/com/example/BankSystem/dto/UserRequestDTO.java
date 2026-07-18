@@ -1,6 +1,5 @@
 package com.example.BankSystem.dto;
 
-
 import com.example.BankSystem.enums.Role;
 
 import jakarta.validation.constraints.Email;
@@ -13,6 +12,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+
 @Setter
 @Getter
 @Builder
@@ -20,20 +20,17 @@ import lombok.Setter;
 @AllArgsConstructor
 public class UserRequestDTO {
 
-	   @NotBlank
-	    private String name;
+	@NotBlank
+	private String name;
 
-	    @Email
-	    private String email;
+	@Email
+	private String email;
 
-	    @Pattern(regexp = "^[0-9]{10}$")
-	    private String mobile;
-	    
-	  
-	    
-	    @NotNull
-	    private Role role;
-	    // getters setters
+	@Pattern(regexp = "^[0-9]{10}$")
+	private String mobile;
 
-		
+	@NotNull
+	private Role role;
+	// getters setters
+
 }

@@ -6,9 +6,6 @@ import java.time.LocalDateTime;
 import com.example.BankSystem.enums.TransactionStatus;
 import com.example.BankSystem.enums.TransactionType;
 
-import jakarta.validation.constraints.DecimalMin;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -20,13 +17,21 @@ import lombok.Setter;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class TransferRequestDTO {
-	@NotBlank
+public class TransactionResponseDTO {
+	private Long id;
+
 	private String fromAccount;
-	@NotBlank
+
 	private String toAccount;
 
-	@NotNull
-	@DecimalMin("0.01")
 	private BigDecimal amount;
+
+	private BigDecimal availableBalance;
+
+	private TransactionType transactionType;
+
+	private TransactionStatus status;
+
+	private LocalDateTime transactionDate;
+	private String description;
 }
