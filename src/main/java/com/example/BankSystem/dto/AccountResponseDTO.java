@@ -3,7 +3,7 @@ package com.example.BankSystem.dto;
 import java.math.BigDecimal;
 
 import com.example.BankSystem.enums.AccountStatus;
-import com.example.BankSystem.enums.Role;
+
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

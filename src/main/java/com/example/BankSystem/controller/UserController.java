@@ -1,6 +1,8 @@
 package com.example.BankSystem.controller;
 
-import org.springframework.http.HttpStatus;
+
+import java.util.List;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -13,8 +15,10 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.example.BankSystem.dto.UserRequestDTO;
 import com.example.BankSystem.dto.UserResponseDTO;
+import com.example.BankSystem.exception.ApiResponse;
 import com.example.BankSystem.inter.UserService;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @RestController
@@ -25,29 +29,42 @@ public class UserController {
 	private final UserService userService;
 
 	@PostMapping("/users")
-	public ResponseEntity<?> createUser(@RequestBody UserRequestDTO users) {
+	public ResponseEntity<ApiResponse<UserResponseDTO>> createUser( @Valid @RequestBody UserRequestDTO users) {
 
-		return ResponseEntity.status(HttpStatus.OK).body(userService.createUser(users));
+		UserResponseDTO response = userService.createUser(users);
+		ApiResponse<UserResponseDTO> apiResponse = new ApiResponse<>(true, "User created", response);
+		return ResponseEntity.ok(apiResponse);
 	}
 
 	@GetMapping("/{id}")
-	public ResponseEntity<UserResponseDTO> getUserData(@PathVariable long id) {
-		return ResponseEntity.ok(userService.getUserById(id));
+	public ResponseEntity<ApiResponse<UserResponseDTO>> getUserData(@PathVariable long id) {
+		
+		
+		ApiResponse<UserResponseDTO> apiResponse = new ApiResponse<>(true, "User Fetch", userService.getUserById(id));
+		return ResponseEntity.ok(apiResponse);
 	}
 
 	@PostMapping("/{id}")
-	public ResponseEntity<?> updateUser(@PathVariable long id, @RequestBody UserRequestDTO users) {
-		return userService.updateUserById(id, users);
+	public ResponseEntity<ApiResponse<UserResponseDTO>> updateUser(@PathVariable long id,
+			 @Valid @RequestBody UserRequestDTO users) {
+		
+		UserResponseDTO response = userService.updateUserById(id, users);
+		
+		ApiResponse<UserResponseDTO> apiResponse = new ApiResponse<>(true, "Record Updated", response);
+		return ResponseEntity.ok(apiResponse);
 	}
 
 	@DeleteMapping("/{id}")
-	public ResponseEntity<?> deleteById(@PathVariable long id) {
-		return ResponseEntity.ok(userService.deleteById(id));
+	public ResponseEntity<Void> deleteById(@PathVariable long id) {
+		userService.deleteById(id);	
+		return ResponseEntity.noContent().build();
 	}
 
 	@GetMapping("/allUsers")
-	public ResponseEntity<?> getAllUsers() {
-		return ResponseEntity.ok(userService.getAllUser());
+	public ResponseEntity<ApiResponse<List<UserResponseDTO>>> getAllUsers() {
+		 
+		 ApiResponse<List<UserResponseDTO>> apiResponse = new ApiResponse<>(true, "All User fetched", userService.getAllUser());
+		return ResponseEntity.ok(apiResponse);
 	}
 
 }

@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.example.BankSystem.enums.AccountStatus;
-import com.example.BankSystem.enums.Role;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

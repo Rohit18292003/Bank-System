@@ -84,14 +84,15 @@ class AccountServiceTest {
 		when(accountRepo.existsByAccountNumber(accountReq.getAccountNumber())).thenReturn(false);
 		// when(accountReq.getInitialBalance().compareTo(BigDecimal.ZERO)<0).thenReturn(false);
 		when(accountMapper.toEntity(accountReq)).thenReturn(account3);
+		when(accountMapper.toDto(account3)).thenReturn(accountResp);
 
+		when(accountRepo.save(account3)).thenReturn(account1);
 		// act
-		ResponseEntity<String> result = accountService.createAccount(accountReq, 1L);
+		AccountResponseDTO result = accountService.createAccount(accountReq, 1L);
 
-		// result
-		Assertions.assertEquals(HttpStatus.CREATED, result.getStatusCode());
+		
 		verify(accountRepo).save(account3);
-		Assertions.assertEquals("Account created", result.getBody());
+
 
 	}
 
@@ -101,9 +102,9 @@ class AccountServiceTest {
 		when(accountMapper.toDto(account1)).thenReturn(accountResp);
 
 		// act
-		ResponseEntity<AccountResponseDTO> result = accountService.getAccountByAccountNumber("745536941664");
+		 AccountResponseDTO response = accountService.getAccountByAccountNumber("745536941664");
 		// result
-		Assertions.assertEquals(HttpStatus.OK, result.getStatusCode());
+		Assertions.assertEquals("745536941664", response.getAccountNumber());
 
 	}
 
@@ -111,13 +112,13 @@ class AccountServiceTest {
 	void shouldReturnUsersAllAccounts() {
 
 		when(userRepo.findById(1L)).thenReturn(Optional.of(user1));
-		when(accountMapper.toDTO(user1.getAccounts())).thenReturn(List.of(accountResp, accountResp2));
+		when(accountMapper.toDto(user1.getAccounts())).thenReturn(List.of(accountResp, accountResp2));
 
 		// act
-		ResponseEntity<List<AccountResponseDTO>> status = accountService.getUsersAllAccounts(1L);
+		 List<AccountResponseDTO> status = accountService.getUsersAllAccounts(1L);
 
 		// result
-		Assertions.assertEquals(HttpStatus.OK, status.getStatusCode());
+	//	Assertions.assertEquals(HttpStatus.OK, status.getStatusCode());
 
 	}
 
@@ -127,10 +128,11 @@ class AccountServiceTest {
 		when(accountRepo.findByAccountNumber("745536941666")).thenReturn(Optional.of(account3));
 		when(accountRepo.save(account3)).thenReturn(account3);
 
+		when(accountMapper.toDto(account3)).thenReturn(accountResp);
 		// act
-		ResponseEntity<String> status = accountService.updateUserAccountStatusByNumber("745536941666", accountReq);
+		 AccountResponseDTO response = accountService.updateAccountStatus("745536941666", accountReq);
 
-		Assertions.assertEquals(HttpStatus.OK, status.getStatusCode());
+		Assertions.assertEquals("745536941664", response.getAccountNumber());
 
 	}
 
@@ -138,10 +140,11 @@ class AccountServiceTest {
 	void shouldDeleteAccount() {
 		when(accountRepo.findByAccountNumber("745536941666")).thenReturn(Optional.of(account3));
 		// act
-		ResponseEntity<String> status = accountService.deleteAccount("745536941666");
+		accountService.deleteAccount("745536941666");
 
 		// assertions
-		Assertions.assertEquals(HttpStatus.OK, status.getStatusCode());
+
+		verify(accountRepo).delete(account3);
 
 	}
 }

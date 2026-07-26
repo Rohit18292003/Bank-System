@@ -4,9 +4,9 @@ import java.math.BigDecimal;
 
 import java.util.List;
 
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.example.BankSystem.dto.AccountRequestDTO;
 import com.example.BankSystem.dto.AccountResponseDTO;
@@ -21,11 +21,12 @@ import com.example.BankSystem.inter.AccountService;
 import com.example.BankSystem.mapper.AccountMapper;
 import com.example.BankSystem.repos.AccountRepo;
 import com.example.BankSystem.repos.UsersRepo;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class AccountServiceImpl implements AccountService {
 
 	private final AccountRepo accountRepo;
@@ -34,63 +35,104 @@ public class AccountServiceImpl implements AccountService {
 
 	@Override
 	@Transactional
-	public ResponseEntity<String> createAccount(AccountRequestDTO account, Long id) {
-		UserEntity userDetail = userRepo.findById(id)
-				.orElseThrow(() -> new UserNotFoundException("User Not found " + id));
+	public AccountResponseDTO createAccount(AccountRequestDTO account, Long id) {
+
+		log.info("Creating account for user ID: {}", id);
+
+		UserEntity user = userRepo.findById(id).orElseThrow(() -> {
+			log.warn("User not found with ID: {}", id);
+			return new UserNotFoundException("User not found with ID: " + id);
+		});
 
 		if (accountRepo.existsByAccountNumber(account.getAccountNumber())) {
-			throw new AccountAlreadyExitsException("Account already exits");
+			log.warn("Account number already exists: {}", account.getAccountNumber());
+			throw new AccountAlreadyExitsException("Account already exists");
 		}
 
 		if (account.getBalance().compareTo(BigDecimal.ZERO) < 0) {
-			throw new InvalidBalanceException("Balance can't not be negative");
+			log.warn("Invalid initial balance: {}", account.getBalance());
+			throw new InvalidBalanceException("Balance cannot be negative");
 		}
 
 		AccountEntity newAccount = accountMapper.toEntity(account);
+		newAccount.setUser(user);
 
-		newAccount.setUser(userDetail);
-		userDetail.getAccounts().add(newAccount);
-		accountRepo.save(newAccount);
+		user.getAccounts().add(newAccount);
 
-		return ResponseEntity.status(HttpStatus.CREATED).body("Account created");
+		
+		AccountEntity response = accountRepo.save(newAccount);
+
+		log.info("Account created successfully. Account Number: {}",response.getAccountNumber());
+
+		return accountMapper.toDto(newAccount);
 	}
 
 	@Override
-	public ResponseEntity<AccountResponseDTO> getAccountByAccountNumber(String accountNumber) {
-		AccountEntity existsAccount = accountRepo.findByAccountNumber(accountNumber)
-				.orElseThrow(() -> new AccountNotFoundException("Account not found "));
-		AccountResponseDTO responseExistsAccount = accountMapper.toDto(existsAccount);
-		return ResponseEntity.ok(responseExistsAccount);
+	public AccountResponseDTO getAccountByAccountNumber(String accountNumber) {
+
+		log.info("Fetching account with account number: {}", accountNumber);
+
+		AccountEntity account = accountRepo.findByAccountNumber(accountNumber).orElseThrow(() -> {
+			log.warn("Account not found: {}", accountNumber);
+			return new AccountNotFoundException("Account not found");
+		});
+
+		log.info("Account fetched successfully: {}", accountNumber);
+
+		return accountMapper.toDto(account);
 	}
 
 	@Override
-	public ResponseEntity<List<AccountResponseDTO>> getUsersAllAccounts(Long userID) {
-		UserEntity user = userRepo.findById(userID)
-				.orElseThrow(() -> new ResourceNotFoundException("User not found with id " + userID));
+	public List<AccountResponseDTO> getUsersAllAccounts(Long userId) {
+
+		log.info("Fetching all accounts for user ID: {}", userId);
+
+		UserEntity user = userRepo.findById(userId).orElseThrow(() -> {
+			log.warn("User not found with ID: {}", userId);
+			return new ResourceNotFoundException("User not found with ID: " + userId);
+		});
+
 		List<AccountEntity> accounts = user.getAccounts();
 
-		List<AccountResponseDTO> accountResponses = accountMapper.toDTO(accounts);
+		log.info("Total accounts found for user {} : {}", userId, accounts.size());
 
-		return ResponseEntity.ok(accountResponses);
+		return accountMapper.toDto(accounts);
 	}
 
 	@Override
-	public ResponseEntity<String> updateUserAccountStatusByNumber(String accountNumber, AccountRequestDTO account) {
-		AccountEntity existsAccount = accountRepo.findByAccountNumber(accountNumber)
-				.orElseThrow(() -> new AccountNotFoundException("Account not found "));
+	@Transactional
+	public AccountResponseDTO updateAccountStatus(String accountNumber, AccountRequestDTO account) {
 
-		existsAccount.setStatus(account.getStatus());
-		accountRepo.save(existsAccount);
+		log.info("Updating account status for account number: {}", accountNumber);
 
-		return ResponseEntity.ok("Status Updated");
+		AccountEntity existingAccount = accountRepo.findByAccountNumber(accountNumber).orElseThrow(() -> {
+			log.warn("Account not found: {}", accountNumber);
+			return new AccountNotFoundException("Account not found");
+		});
+
+		existingAccount.setStatus(account.getStatus());
+
+		AccountEntity updatedAccount = accountRepo.save(existingAccount);
+
+		log.info("Account status updated successfully for account number: {}", accountNumber);
+
+		return accountMapper.toDto(updatedAccount);
 	}
 
 	@Override
-	public ResponseEntity<String> deleteAccount(String accountNumber) {
-		AccountEntity existsAccount = accountRepo.findByAccountNumber(accountNumber)
-				.orElseThrow(() -> new AccountNotFoundException("Account not found "));
-		accountRepo.delete(existsAccount);
-		return ResponseEntity.ok("Account deleted");
+	@Transactional
+	public void deleteAccount(String accountNumber) {
+
+		log.info("Deleting account with account number: {}", accountNumber);
+
+		AccountEntity account = accountRepo.findByAccountNumber(accountNumber).orElseThrow(() -> {
+			log.warn("Account not found: {}", accountNumber);
+			return new AccountNotFoundException("Account not found");
+		});
+
+		accountRepo.delete(account);
+
+		log.info("Account deleted successfully: {}", accountNumber);
 	}
 
 }

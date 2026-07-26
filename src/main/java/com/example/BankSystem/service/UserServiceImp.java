@@ -10,15 +10,18 @@ import org.springframework.transaction.annotation.Transactional;
 import com.example.BankSystem.dto.UserRequestDTO;
 import com.example.BankSystem.dto.UserResponseDTO;
 import com.example.BankSystem.entity.UserEntity;
+import com.example.BankSystem.exception.AccountAlreadyExitsException;
 import com.example.BankSystem.exception.ResourceNotFoundException;
 import com.example.BankSystem.inter.UserService;
 import com.example.BankSystem.mapper.UsersMapper;
 import com.example.BankSystem.repos.UsersRepo;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class UserServiceImp implements UserService {
 
 	private final UsersRepo userRepo;
@@ -26,56 +29,96 @@ public class UserServiceImp implements UserService {
 
 	@Override
 	@Transactional
-	public ResponseEntity createUser(UserRequestDTO users) {
+	public UserResponseDTO createUser(UserRequestDTO users) {
 
-		if (userRepo.existsByEmail(users.getEmail()) || userRepo.existsByMobile(users.getMobile())) {
-			return ResponseEntity.status(HttpStatus.FOUND).body("Customer mail or mobile already registered");
-		}
-		UserEntity customer = userMapper.toEntity(users);
-		customer.setActive(true);
-		userRepo.save(customer);
-		return ResponseEntity.status(HttpStatus.CREATED).body("Customer Created");
+	    log.info("Creating user with email: {}", users.getEmail());
+
+	    if (userRepo.existsByEmail(users.getEmail())) {
+	        log.warn("User creation failed. Email already exists: {}", users.getEmail());
+	        throw new AccountAlreadyExitsException("Email already exists");
+	    }
+
+	    if (userRepo.existsByMobile(users.getMobile())) {
+	        log.warn("User creation failed. Mobile already exists: {}", users.getMobile());
+	        throw new AccountAlreadyExitsException("Mobile number already exists");
+	    }
+
+	    UserEntity customer = userMapper.toEntity(users);
+	    customer.setActive(true);
+
+	    customer = userRepo.save(customer);
+
+	    log.info("User created successfully with ID: {}", customer.getId());
+
+	    return userMapper.toDTO(customer);
 	}
 
 	@Override
 	public UserResponseDTO getUserById(Long id) {
 
-		UserEntity resp = userRepo.findById(id)
-				.orElseThrow(() -> new ResourceNotFoundException("User not found wit id " + id));
-		return userMapper.toDTO(resp);
+	    log.info("Fetching user with ID: {}", id);
+
+	    UserEntity user = userRepo.findById(id)
+	            .orElseThrow(() -> {
+	                log.warn("User not found with ID: {}", id);
+	                return new ResourceNotFoundException("User not found with ID: " + id);
+	            });
+
+	    log.info("User fetched successfully with ID: {}", id);
+
+	    return userMapper.toDTO(user);
 	}
 
 	@Override
-	public ResponseEntity<UserEntity> updateUserById(Long id, UserRequestDTO newUserData) {
+	@Transactional
+	public UserResponseDTO updateUserById(Long id, UserRequestDTO newUserData) {
 
-		UserEntity customer = userRepo.findById(id)
-				.orElseThrow(() -> new ResourceNotFoundException("User not found for update operation with id " + id));
+	    log.info("Updating user with ID: {}", id);
 
-		customer.setName(newUserData.getName());
-		customer.setEmail(newUserData.getEmail());
-		customer.setMobile(newUserData.getMobile());
-		customer.setRole(newUserData.getRole());
+	    UserEntity customer = userRepo.findById(id)
+	            .orElseThrow(() -> {
+	                log.warn("User not found for update with ID: {}", id);
+	                return new ResourceNotFoundException("User not found with ID: " + id);
+	            });
 
-		UserEntity updatedUser = userRepo.save(customer);
-		return ResponseEntity.ok(updatedUser);
+	    customer.setName(newUserData.getName());
+	    customer.setEmail(newUserData.getEmail());
+	    customer.setMobile(newUserData.getMobile());
+	    customer.setRole(newUserData.getRole());
+
+	    UserEntity updatedUser = userRepo.save(customer);
+
+	    log.info("User updated successfully with ID: {}", updatedUser.getId());
+
+	    return userMapper.toDTO(updatedUser);
 	}
 
 	@Override
-	public ResponseEntity<String> deleteById(long id) {
-		UserEntity dataForDelete = userRepo.findById(id)
-				.orElseThrow(() -> new ResourceNotFoundException("User not found"));
-		userRepo.deleteById(dataForDelete.getId());
-		return ResponseEntity.ok("User Deleted successfully");
+	@Transactional
+	public void deleteById(long id) {
+
+	    log.info("Deleting user with ID: {}", id);
+
+	    UserEntity user = userRepo.findById(id)
+	            .orElseThrow(() -> {
+	                log.warn("User not found with ID: {}", id);
+	                return new ResourceNotFoundException("User not found with ID: " + id);
+	            });
+
+	    userRepo.delete(user);
+
+	    log.info("User deleted successfully with ID: {}", id);
 	}
-
 	@Override
-	public ResponseEntity<List<UserResponseDTO>> getAllUser() {
+	public List<UserResponseDTO> getAllUser() {
 
-		List<UserEntity> allUsersEntity = userRepo.findAll();
+	    log.info("Fetching all users");
 
-		List<UserResponseDTO> allUserDTO = userMapper.toDTO(allUsersEntity);
-		return ResponseEntity.ok(allUserDTO);
+	    List<UserEntity> users = userRepo.findAll();
 
+	    log.info("Total users found: {}", users.size());
+
+	    return userMapper.toDTO(users);
 	}
 
 }

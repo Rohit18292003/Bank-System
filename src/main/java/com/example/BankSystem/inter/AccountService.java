@@ -9,15 +9,15 @@ import com.example.BankSystem.dto.AccountResponseDTO;
 
 public interface AccountService {
 
-	public ResponseEntity<String> createAccount(AccountRequestDTO account, Long id);
+	public AccountResponseDTO createAccount(AccountRequestDTO account, Long id);
 
-	public ResponseEntity<AccountResponseDTO> getAccountByAccountNumber(String accountNumber);
+	public AccountResponseDTO getAccountByAccountNumber(String accountNumber);
 
-	public ResponseEntity<String> updateUserAccountStatusByNumber(String accountNumber, AccountRequestDTO account);
+	public AccountResponseDTO updateAccountStatus(String accountNumber, AccountRequestDTO account);
 
-	public ResponseEntity<String> deleteAccount(String accountNumber);
+	public void deleteAccount(String accountNumber);
 
-	public ResponseEntity<List<AccountResponseDTO>> getUsersAllAccounts(Long userID);
+	public List<AccountResponseDTO> getUsersAllAccounts(Long userID);
 	// public ResponseEntity<Map<Object,List<AccountResponseDTO> >>
 	// getAllUsersAccounts();
 

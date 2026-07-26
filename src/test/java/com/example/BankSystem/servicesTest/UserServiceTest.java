@@ -51,8 +51,8 @@ class UserServiceTest {
 		newUserRequest = UserRequestDTO.builder().name("Rohit Birajdar").email("birajdarrohit56@gmail.com")
 				.mobile("9067792489").role(Role.CUSTOMER).build();
 
-		respUser1 = UserResponseDTO.builder().id(1L).name("Rohit").email("rohit@123").mobile("9067792489")
-				.role(Role.CUSTOMER).build();
+		respUser1 = UserResponseDTO.builder().id(1L).name("Rohit Birajdar").email("birajdarrohit56@gmail.com")
+				.mobile("9067792489").role(Role.CUSTOMER).build();
 		respUser2 = UserResponseDTO.builder().id(2L).name("Jay").email("jay@123").mobile("9067862477")
 				.role(Role.CUSTOMER).build();
 	}
@@ -64,17 +64,19 @@ class UserServiceTest {
 		when(userRepo.existsByEmail(newUserRequest.getEmail())).thenReturn(false);
 		when(userRepo.existsByMobile(newUserRequest.getMobile())).thenReturn(false);
 		when(userMapper.toEntity(newUserRequest)).thenReturn(user1);
+		when(userMapper.toDTO(user1)).thenReturn(respUser1);
 
 		when(userRepo.save(user1)).thenReturn(user1);
 
 		// act
-		ResponseEntity<?> result = userService.createUser(newUserRequest);
+		UserResponseDTO result = userService.createUser(newUserRequest);
 
+		System.out.println(result);
 		// result
-		Assertions.assertEquals(HttpStatus.CREATED, result.getStatusCode());
+		// Assertions.assertEquals(HttpStatus.CREATED, result.getStatusCode());
 
 		verify(userRepo).save(user1);
-		Assertions.assertEquals("Customer Created", result.getBody());
+		// Assertions.assertEquals("Customer Created", result.getBody());
 	}
 
 	@Test
@@ -103,16 +105,17 @@ class UserServiceTest {
 		when(userRepo.findById(user1.getId())).thenReturn(Optional.of(user1));
 
 		when(userRepo.save(user1)).thenReturn(user1);
+		when(userMapper.toDTO(user1)).thenReturn(respUser1);
 
 		// act
-		ResponseEntity<UserEntity> status = userService.updateUserById(1L, newUserRequest);
+		UserResponseDTO status = userService.updateUserById(1L, newUserRequest);
 
-		Assertions.assertEquals(HttpStatus.OK, status.getStatusCode());
+		// Assertions.assertEquals(HttpStatus.OK, status.get());
 
-		assertEquals("Rohit Birajdar", status.getBody().getName());
-		assertEquals("birajdarrohit56@gmail.com", status.getBody().getEmail());
-		assertEquals("9067792489", status.getBody().getMobile());
-		assertEquals(Role.CUSTOMER, status.getBody().getRole());
+		assertEquals("Rohit Birajdar", status.getName());
+		assertEquals("birajdarrohit56@gmail.com", status.getEmail());
+		assertEquals("9067792489", status.getMobile());
+		assertEquals(Role.CUSTOMER, status.getRole());
 
 		verify(userRepo).findById(1L);
 		verify(userRepo).save(user1);
@@ -131,7 +134,7 @@ class UserServiceTest {
 
 		// assert
 		verify(userRepo).findById(user1.getId());
-		verify(userRepo).deleteById(user1.getId());
+		verify(userRepo).delete(user1);
 
 	}
 
@@ -141,15 +144,13 @@ class UserServiceTest {
 		when(userRepo.findAll()).thenReturn(List.of(user1, user2));
 		when(userMapper.toDTO(List.of(user1, user2))).thenReturn(List.of(respUser1, respUser2));
 		// act
-		ResponseEntity<List<UserResponseDTO>> resultOfAllUser = userService.getAllUser();
+		 List<UserResponseDTO> resultOfAllUser = userService.getAllUser();
 
 		// assertion
 
 		Assertions.assertNotNull(resultOfAllUser);
-		Assertions.assertEquals(HttpStatus.OK, resultOfAllUser.getStatusCode());
-		Assertions.assertEquals(user1.getId(), resultOfAllUser.getBody().get(0).getId());
-		System.out
-				.println("User entity " + user1.getId() + " User Response " + resultOfAllUser.getBody().get(0).getId());
+		Assertions.assertEquals(2, resultOfAllUser.size());
+
 		verify(userRepo).findAll();
 		verify(userMapper).toDTO(List.of(user1, user2));
 

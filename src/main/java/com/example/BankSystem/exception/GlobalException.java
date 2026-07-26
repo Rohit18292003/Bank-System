@@ -38,7 +38,7 @@ public class GlobalException {
 
 	@ExceptionHandler(AccountAlreadyExitsException.class)
 	public ResponseEntity<Map<String, Object>> AccountAlreadyExitsException(AccountAlreadyExitsException ex) {
-		return buildResponse(HttpStatus.ALREADY_REPORTED, ex.getMessage());
+		return buildResponse(HttpStatus.CONFLICT, ex.getMessage());
 	}
 
 	@ExceptionHandler(InvalidBalanceException.class)

@@ -1,10 +1,6 @@
 package com.example.BankSystem.dto;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
-
-import com.example.BankSystem.enums.TransactionStatus;
-import com.example.BankSystem.enums.TransactionType;
 
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotBlank;

@@ -86,7 +86,7 @@ public class TransactionServiceImplement implements TransactionService {
 				.orElseThrow(() -> new AccountNotFoundException("Account not found"));
 		if (withdrawRequestDTO.getAmount().compareTo(BigDecimal.ZERO) <= 0) {
 			throw new InvalidBalanceException("Withdraw Balance can't not be negative");
-		}
+		}	
 
 		if (!ifAccountFound.getStatus().equals(AccountStatus.ACTIVE)) {
 			throw new AccountStatusException("Account is not active please contact to bank");
@@ -124,10 +124,15 @@ public class TransactionServiceImplement implements TransactionService {
 
 		AccountEntity toAccount = accountRepo.findByAccountNumber(transferRequestDTO.getToAccount())
 				.orElseThrow(() -> new AccountNotFoundException("Reciver Account not found"));
-		if (!fromAccount.getStatus().equals(AccountStatus.ACTIVE)
-				&& toAccount.getStatus().equals(AccountStatus.ACTIVE)) {
-			throw new AccountStatusException("Account is not active please contact to bank");
+		
+		
+		if (!fromAccount.getStatus().equals(AccountStatus.ACTIVE)) {
+			throw new AccountStatusException("Sender account is not active.");
 		}
+		if (!toAccount.getStatus().equals(AccountStatus.ACTIVE)) {
+			throw new AccountStatusException("Receiver account is not active.");
+		}
+
 
 		if (fromAccount.getBalance().compareTo(transferRequestDTO.getAmount()) <= 0) {
 			throw new InsufficientFundsException("Insufficient Balance can't not be transfer");

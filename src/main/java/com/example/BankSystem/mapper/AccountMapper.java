@@ -17,7 +17,7 @@ public interface AccountMapper {
 
 	AccountEntity toEntity(@Valid AccountRequestDTO accountRequestDTO);
 
-	List<AccountResponseDTO> toDTO(List<AccountEntity> accountEntity);
+	List<AccountResponseDTO> toDto(List<AccountEntity> accountEntity);
 
 	List<AccountEntity> toEntity(@Valid List<AccountRequestDTO> accountRequestDto);
 }

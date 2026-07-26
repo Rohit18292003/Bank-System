@@ -3,9 +3,7 @@ package com.example.BankSystem.dto;
 import java.math.BigDecimal;
 
 import com.example.BankSystem.enums.AccountStatus;
-import com.example.BankSystem.enums.Role;
 
-import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
