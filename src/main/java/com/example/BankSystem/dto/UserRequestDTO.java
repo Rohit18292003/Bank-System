@@ -2,6 +2,7 @@ package com.example.BankSystem.dto;
 
 import com.example.BankSystem.enums.Role;
 
+import jakarta.persistence.Column;
 import jakarta.validation.constraints.Email;
 
 import jakarta.validation.constraints.NotBlank;
@@ -25,7 +26,10 @@ public class UserRequestDTO {
 
 	@Email
 	private String email;
-
+	
+	@Column
+	private String password;
+	
 	@Pattern(regexp = "^[0-9]{10}$")
 	private String mobile;
 

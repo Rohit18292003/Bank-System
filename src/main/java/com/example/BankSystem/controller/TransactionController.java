@@ -10,7 +10,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.example.BankSystem.dto.AccountResponseDTO;
 import com.example.BankSystem.dto.DepositRequestDTO;
 import com.example.BankSystem.dto.TransactionResponseDTO;
 import com.example.BankSystem.dto.TransferRequestDTO;
@@ -22,55 +21,78 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @RestController
-@RequestMapping("/api/v1/transaction")
+@RequestMapping("/api/v1")
 @RequiredArgsConstructor
 public class TransactionController {
 
-	private final TransactionService transactionService;
-	
-	
-	@PostMapping("/deposit")
-	public ResponseEntity<ApiResponse<TransactionResponseDTO>> deposit(@Valid @RequestBody DepositRequestDTO depositRequestDTO) {
-		TransactionResponseDTO response = transactionService.deposit(depositRequestDTO);
-		ApiResponse<TransactionResponseDTO> apiResponse = new ApiResponse<>(true, "Money deposit successfully ", response);
-		return ResponseEntity.ok(apiResponse);
-	}
-	
-	
-	
-	@PostMapping("/withdraw")
-	public ResponseEntity<ApiResponse<TransactionResponseDTO>> withdraw( @Valid @RequestBody WithdrawRequestDTO withdrawRequestDTO) {
-		        TransactionResponseDTO response = transactionService.withdraw(withdrawRequestDTO);
-		    	ApiResponse<TransactionResponseDTO> apiResponse = new ApiResponse<>(true, "Money withdraw successfully ", response);
-				
-		return ResponseEntity.ok(apiResponse);
-	}
+    private final TransactionService transactionService;
 
-	
+    @PostMapping("/transactions/deposit")
+    public ResponseEntity<ApiResponse<TransactionResponseDTO>> deposit(
+            @Valid @RequestBody DepositRequestDTO depositRequestDTO) {
 
-	@PostMapping("/transfer")
-	public ResponseEntity<ApiResponse<TransactionResponseDTO>> transfer(@Valid @RequestBody TransferRequestDTO transferRequestDTO) {
-		        TransactionResponseDTO response = transactionService.transfer(transferRequestDTO);
-		        
-		    	ApiResponse<TransactionResponseDTO> apiResponse = new ApiResponse<>(true, "Money Transfer successfully ", response);
-				
-				return ResponseEntity.ok(apiResponse);
+        TransactionResponseDTO response =
+                transactionService.deposit(depositRequestDTO);
 
-	}
+        ApiResponse<TransactionResponseDTO> apiResponse =
+                new ApiResponse<>(true, "Money deposited successfully", response);
 
-	@GetMapping("getAccountTransaction/{accountNumber}")
-	public ResponseEntity<ApiResponse<List<TransactionResponseDTO>>> getAccountHistory(@PathVariable String accountNumber) {
-		List<TransactionResponseDTO> response = transactionService.getAccountTransactionHistory(accountNumber);
-		ApiResponse<List<TransactionResponseDTO>> apiResponse = new ApiResponse<>(true, "get Account History successfully ", response);	
-		return ResponseEntity.ok(apiResponse);
-	}
+        return ResponseEntity.ok(apiResponse);
+    }
 
-	@GetMapping("getUserTransaction/{id}")
-	public ResponseEntity<ApiResponse<List<TransactionResponseDTO>>> getUserAccountHistory(@PathVariable Long id) {
-		List<TransactionResponseDTO> response = transactionService.getUserTransactionHistory(id);
-		ApiResponse<List<TransactionResponseDTO>> apiResponse = new ApiResponse<>(true, "get User Accounts History successfully ", response);	
-		return ResponseEntity.ok(apiResponse);
-		
-	}
+    @PostMapping("/transactions/withdraw")
+    public ResponseEntity<ApiResponse<TransactionResponseDTO>> withdraw(
+            @Valid @RequestBody WithdrawRequestDTO withdrawRequestDTO) {
 
+        TransactionResponseDTO response =
+                transactionService.withdraw(withdrawRequestDTO);
+
+        ApiResponse<TransactionResponseDTO> apiResponse =
+                new ApiResponse<>(true, "Money withdrawn successfully", response);
+
+        return ResponseEntity.ok(apiResponse);
+    }
+
+    @PostMapping("/transactions/transfer")
+    public ResponseEntity<ApiResponse<TransactionResponseDTO>> transfer(
+            @Valid @RequestBody TransferRequestDTO transferRequestDTO) {
+
+        TransactionResponseDTO response =
+                transactionService.transfer(transferRequestDTO);
+
+        ApiResponse<TransactionResponseDTO> apiResponse =
+                new ApiResponse<>(true, "Money transferred successfully", response);
+
+        return ResponseEntity.ok(apiResponse);
+    }
+
+    @GetMapping("/accounts/{accountNumber}/transactions")
+    public ResponseEntity<ApiResponse<List<TransactionResponseDTO>>> getAccountHistory(
+            @PathVariable String accountNumber) {
+
+        List<TransactionResponseDTO> response =
+                transactionService.getAccountTransactionHistory(accountNumber);
+
+        ApiResponse<List<TransactionResponseDTO>> apiResponse =
+                new ApiResponse<>(true,
+                        "Account transaction history fetched successfully",
+                        response);
+
+        return ResponseEntity.ok(apiResponse);
+    }
+
+    @GetMapping("/users/{userId}/transactions")
+    public ResponseEntity<ApiResponse<List<TransactionResponseDTO>>> getUserAccountHistory(
+            @PathVariable Long userId) {
+
+        List<TransactionResponseDTO> response =
+                transactionService.getUserTransactionHistory(userId);
+
+        ApiResponse<List<TransactionResponseDTO>> apiResponse =
+                new ApiResponse<>(true,
+                        "User transaction history fetched successfully",
+                        response);
+
+        return ResponseEntity.ok(apiResponse);
+    }
 }

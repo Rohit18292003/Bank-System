@@ -2,7 +2,6 @@ package com.example.BankSystem.controller;
 
 import java.util.List;
 
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -15,7 +14,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.example.BankSystem.dto.AccountRequestDTO;
 import com.example.BankSystem.dto.AccountResponseDTO;
-import com.example.BankSystem.dto.UserResponseDTO;
 import com.example.BankSystem.exception.ApiResponse;
 import com.example.BankSystem.inter.AccountService;
 
@@ -23,66 +21,69 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @RestController
-@RequestMapping("/api/v1/account")
+@RequestMapping("/api/v1")
 @RequiredArgsConstructor
 public class AccountController {
 
-	private final AccountService accountService;
+    private final AccountService accountService;
 
-	// Create
-	@PostMapping("/{id}")
-	public ResponseEntity<ApiResponse<AccountResponseDTO>> create(@Valid @RequestBody AccountRequestDTO requestDTO, @PathVariable Long id) {
+    @PostMapping("/users/{userId}/accounts")
+    public ResponseEntity<ApiResponse<AccountResponseDTO>> create(
+            @Valid @RequestBody AccountRequestDTO requestDTO,
+            @PathVariable Long userId) {
 
-	 AccountResponseDTO response = accountService.createAccount(requestDTO, id);
-	 ApiResponse<AccountResponseDTO> apiResponse = new ApiResponse<>(true, "Account created", response);
-	return ResponseEntity.ok(apiResponse);
+       AccountResponseDTO response = accountService.createAccount(requestDTO, userId);
 
-	}
+        ApiResponse<AccountResponseDTO> apiResponse =
+                new ApiResponse<>(true, "Account created successfully", response);
 
-	// Get All
-	@GetMapping("usersAccount/{userId}")
-	public ResponseEntity<ApiResponse<List<AccountResponseDTO>>> getUserAllAccount(@PathVariable Long userId) {
+        return ResponseEntity.ok(apiResponse);
+    }
 
-		List<AccountResponseDTO> response = accountService.getUsersAllAccounts(userId);
-		ApiResponse<List<AccountResponseDTO>> apiResponse = new ApiResponse<>(true, "Get User All Accounts", response);
-		return ResponseEntity.ok(apiResponse);
-	}
+    @GetMapping("/users/{userId}/accounts")
+    public ResponseEntity<ApiResponse<List<AccountResponseDTO>>> getUserAllAccount(
+            @PathVariable Long userId) {
 
-	// Get By Id
-	@GetMapping("/{accountNum}")
-	public ResponseEntity<ApiResponse<AccountResponseDTO>> getByAccountNum(@PathVariable String accountNum) {
+        List<AccountResponseDTO> response =
+                accountService.getUsersAllAccounts(userId);
 
-		AccountResponseDTO response = accountService.getAccountByAccountNumber(accountNum);
-		ApiResponse<AccountResponseDTO> apiResponse = new ApiResponse<>(true, "Get Account by number", response);
-		return ResponseEntity.ok(apiResponse);
-	}
+        ApiResponse<List<AccountResponseDTO>> apiResponse =
+                new ApiResponse<>(true, "User accounts fetched successfully", response);
 
-	// Update (Replace Entire Resource)
-	@PutMapping("/{accountNum}")
-	public ResponseEntity<ApiResponse<AccountResponseDTO>> update(@PathVariable String accountNum,
-			@Valid @RequestBody AccountRequestDTO requestDTO) {
+        return ResponseEntity.ok(apiResponse);
+    }
 
-		 AccountResponseDTO response = accountService.updateAccountStatus(accountNum, requestDTO);
-		 ApiResponse<AccountResponseDTO> apiResponse = new ApiResponse<>(true, "update Account Status", response);
-		return ResponseEntity.ok(apiResponse);
-	}
+    @GetMapping("/accounts/{accountNumber}")
+    public ResponseEntity<ApiResponse<AccountResponseDTO>> getByAccountNum(
+            @PathVariable String accountNumber) {
 
-//    // Partial Update
-//    @PatchMapping("/{id}")
-//    public ResponseEntity<ExampleResponseDTO> partialUpdate(
-//            @PathVariable Long id,
-//            @RequestBody ExampleRequestDTO requestDTO) {
-//
-//        ExampleResponseDTO response = exampleService.partialUpdate(id, requestDTO);
-//        return ResponseEntity.ok(response);
-//    }
+        AccountResponseDTO response =
+                accountService.getAccountByAccountNumber(accountNumber);
 
-	// Delete
-	@DeleteMapping("/delete/{accountNum}")
-	public ResponseEntity<Void> delete(@PathVariable String accountNum) {
+        ApiResponse<AccountResponseDTO> apiResponse =
+                new ApiResponse<>(true, "Account fetched successfully", response);
 
-		accountService.deleteAccount(accountNum);
-		return ResponseEntity.noContent().build();
-	}
+        return ResponseEntity.ok(apiResponse);
+    }
 
+    @PutMapping("/accounts/{accountNumber}")
+    public ResponseEntity<ApiResponse<AccountResponseDTO>> update(
+            @PathVariable String accountNumber,
+            @Valid @RequestBody AccountRequestDTO requestDTO) {
+
+        AccountResponseDTO response =
+                accountService.updateAccountStatus(accountNumber, requestDTO);
+
+        ApiResponse<AccountResponseDTO> apiResponse =
+                new ApiResponse<>(true, "Account updated successfully", response);
+
+        return ResponseEntity.ok(apiResponse);
+    }
+
+    @DeleteMapping("/accounts/{accountNumber}")
+    public ResponseEntity<Void> delete(@PathVariable String accountNumber) {
+
+        accountService.deleteAccount(accountNumber);
+        return ResponseEntity.noContent().build();
+    }
 }

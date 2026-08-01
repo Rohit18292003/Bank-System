@@ -40,6 +40,9 @@ public class UserEntity {
 	@NotBlank
 	private String name;
 
+	@Column
+	private String password;
+	
 	@Column(unique = true, nullable = false)
 	@Email
 	private String email;

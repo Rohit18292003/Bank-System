@@ -4,6 +4,8 @@ import java.util.List;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,6 +28,8 @@ public class UserServiceImp implements UserService {
 
 	private final UsersRepo userRepo;
 	private final UsersMapper userMapper;
+	
+	private final PasswordEncoder passwordEncoder;
 
 	@Override
 	@Transactional
@@ -45,7 +49,9 @@ public class UserServiceImp implements UserService {
 
 	    UserEntity customer = userMapper.toEntity(users);
 	    customer.setActive(true);
+	    customer.setPassword(passwordEncoder.encode(users.getPassword()));
 
+	    System.out.println("ERROR Occcur while inserting record inside database");
 	    customer = userRepo.save(customer);
 
 	    log.info("User created successfully with ID: {}", customer.getId());
@@ -54,21 +60,38 @@ public class UserServiceImp implements UserService {
 	}
 
 	@Override
-	public UserResponseDTO getUserById(Long id) {
+	public UserResponseDTO getUserByEmail(String email) {
 
-	    log.info("Fetching user with ID: {}", id);
+		log.info("User service implementation method execute ");
+	    log.info("Fetching user with Email: {}", email);
 
-	    UserEntity user = userRepo.findById(id)
+	    UserEntity user = userRepo.findByEmail(email)
 	            .orElseThrow(() -> {
-	                log.warn("User not found with ID: {}", id);
-	                return new ResourceNotFoundException("User not found with ID: " + id);
+	                log.warn("User not found with Email: {}", email);
+	                return new ResourceNotFoundException("User not found with Email: " + email);
 	            });
 
-	    log.info("User fetched successfully with ID: {}", id);
+	    log.info("User fetched successfully with Email: {}", email);
 
 	    return userMapper.toDTO(user);
 	}
 
+	@Override
+	public UserResponseDTO getUserById(Long id) {
+		log.info("User service implementation method execute ");
+	    log.info("Fetching user with id: {}", id);
+
+	    UserEntity user = userRepo.findById(id)
+	            .orElseThrow(() -> {
+	                log.warn("User not found with Email: {}", id);
+	                return new ResourceNotFoundException("User not found with id: " + id);
+	            });
+
+	    log.info("User fetched successfully with id: {}", id);
+
+	    return userMapper.toDTO(user);
+	}
+	
 	@Override
 	@Transactional
 	public UserResponseDTO updateUserById(Long id, UserRequestDTO newUserData) {
@@ -120,5 +143,7 @@ public class UserServiceImp implements UserService {
 
 	    return userMapper.toDTO(users);
 	}
+
+	
 
 }
