@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -17,7 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.example.BankSystem.dto.UserRequestDTO;
 import com.example.BankSystem.dto.UserResponseDTO;
 import com.example.BankSystem.exception.ApiResponse;
-import com.example.BankSystem.inter.UserService;
+import com.example.BankSystem.interfaces.UserService;
 import com.example.BankSystem.security.CustomUserDetails;
 
 import jakarta.validation.Valid;
@@ -44,13 +45,13 @@ public class UserController {
     }
 
     @GetMapping("/getUser") 
-    public ResponseEntity<ApiResponse<UserResponseDTO>> getUserData(@AuthenticationPrincipal CustomUserDetails userDetails) {
+    public ResponseEntity<ApiResponse<UserResponseDTO>> getUserData(Authentication authentication) {
 
     	log.info("get userData method execute inside user controller ");
     	
         ApiResponse<UserResponseDTO> apiResponse =
-                new ApiResponse<>(true, "User fetched successfully",
-                        userService.getUserByEmail(userDetails.getUsername()));
+                new ApiResponse<>(true, "User fetch ed successfully",
+                        userService.getUserByEmail(authentication.getName()));
 
         return ResponseEntity.ok(apiResponse);
     }
@@ -63,9 +64,9 @@ public class UserController {
     @PutMapping("/{userId}")
     public ResponseEntity<ApiResponse<UserResponseDTO>> updateUser(
             @PathVariable Long userId,
-            @Valid @RequestBody UserRequestDTO users) {
+            @Valid @RequestBody UserRequestDTO users ,@AuthenticationPrincipal CustomUserDetails userDetails ) {
 
-        UserResponseDTO response = userService.updateUserById(userId, users);
+        UserResponseDTO response = userService.updateUserById(userId, users, userDetails.getUsername());
 
         ApiResponse<UserResponseDTO> apiResponse =
                 new ApiResponse<>(true, "User updated successfully", response);
@@ -80,7 +81,7 @@ public class UserController {
         return ResponseEntity.noContent().build();
     }
 
-    @GetMapping
+    @GetMapping("/allUser")
     public ResponseEntity<ApiResponse<List<UserResponseDTO>>> getAllUsers() {
 
         ApiResponse<List<UserResponseDTO>> apiResponse =

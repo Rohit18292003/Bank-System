@@ -51,6 +51,22 @@ public class GlobalException {
 	public ResponseEntity<Map<String, Object>> AccountStatusException(AccountStatusException ex) {
 		return buildResponse(HttpStatus.LOCKED, ex.getMessage());
 	}
+	
+	@ExceptionHandler(AccessDeniedException.class)
+	public ResponseEntity<Map<String, Object>> AccessDeniedHandler(AccessDeniedException ex) {
+		return buildResponse(HttpStatus.BAD_REQUEST, ex.getMessage());
+	}
+
+	@ExceptionHandler(JwtAuthenticationEntryPoint.class)
+	public ResponseEntity<Map<String, Object>> JwtAuthenticationEntryPoint(JwtAuthenticationEntryPoint ex) {
+		return buildResponse(HttpStatus.CONFLICT, ex.getMessage());
+	}
+	
+	@ExceptionHandler(AuthenticationEntryPoint.class)
+	public ResponseEntity<Map<String, Object>> AuthenticationEntryPoint(AuthenticationEntryPoint ex) {
+		return buildResponse(HttpStatus.CONFLICT, ex.getMessage());
+	}
+
 
 	private ResponseEntity<Map<String, Object>> buildResponse(HttpStatus status, String message) {
 		Map<String, Object> body = new HashMap<>();

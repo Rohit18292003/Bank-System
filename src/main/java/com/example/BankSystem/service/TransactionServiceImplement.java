@@ -1,9 +1,9 @@
 package com.example.BankSystem.service;
 
 import java.util.List;
-import java.util.Optional;
 
-import org.springframework.data.domain.Sort;
+import com.example.BankSystem.exception.*;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
 import com.example.BankSystem.dto.DepositRequestDTO;
@@ -14,15 +14,10 @@ import com.example.BankSystem.entity.AccountEntity;
 import com.example.BankSystem.entity.TransactionEntity;
 import com.example.BankSystem.entity.UserEntity;
 import com.example.BankSystem.enums.AccountStatus;
+
 import com.example.BankSystem.enums.TransactionStatus;
 import com.example.BankSystem.enums.TransactionType;
-import com.example.BankSystem.exception.AccountNotFoundException;
-import com.example.BankSystem.exception.AccountStatusException;
-import com.example.BankSystem.exception.InsufficientFundsException;
-import com.example.BankSystem.exception.InvalidBalanceException;
-import com.example.BankSystem.exception.UserNotFoundException;
-import com.example.BankSystem.inter.TransactionService;
-import com.example.BankSystem.mapper.AccountMapper;
+import com.example.BankSystem.interfaces.TransactionService;
 import com.example.BankSystem.mapper.TransactionMapper;
 import com.example.BankSystem.repos.AccountRepo;
 import com.example.BankSystem.repos.TransactionRepo;
@@ -30,15 +25,15 @@ import com.example.BankSystem.repos.UsersRepo;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.util.ArrayList;
-import java.util.Collections;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class TransactionServiceImplement implements TransactionService {
 
 	private final UsersRepo usersRepo;
@@ -75,15 +70,22 @@ public class TransactionServiceImplement implements TransactionService {
 		accountRepo.save(ifAccountFound);
 
 		transactionRepo.save(transactionEntity);
-		TransactionResponseDTO res = transactionMapper.toDTO(transactionEntity);
-		return res;
+		 
+		return transactionMapper.toDTO(transactionEntity);
 
 	}
 
 	@Override
-	public TransactionResponseDTO withdraw(WithdrawRequestDTO withdrawRequestDTO) {
+	public TransactionResponseDTO withdraw(WithdrawRequestDTO withdrawRequestDTO , String email) {
+		
+		
 		AccountEntity ifAccountFound = accountRepo.findByAccountNumber(withdrawRequestDTO.getFromAccount())
 				.orElseThrow(() -> new AccountNotFoundException("Account not found"));
+		
+		if(!ifAccountFound.getUser().getEmail().equals(email)) {
+			throw new AccessDeniedException("You can't withdrawn money from this account, it required account holder credentials ");
+		}
+		
 		if (withdrawRequestDTO.getAmount().compareTo(BigDecimal.ZERO) <= 0) {
 			throw new InvalidBalanceException("Withdraw Balance can't not be negative");
 		}	
@@ -112,12 +114,12 @@ public class TransactionServiceImplement implements TransactionService {
 		accountRepo.save(ifAccountFound);
 
 		transactionRepo.save(transactionEntity);
-		TransactionResponseDTO res = transactionMapper.toDTO(transactionEntity);
-		return res;
+		
+		return transactionMapper.toDTO(transactionEntity);
 	}
 
 	@Override
-	public TransactionResponseDTO transfer(TransferRequestDTO transferRequestDTO) {
+	public TransactionResponseDTO transfer(TransferRequestDTO transferRequestDTO , String email) {
 
 		AccountEntity fromAccount = accountRepo.findByAccountNumber(transferRequestDTO.getFromAccount())
 				.orElseThrow(() -> new AccountNotFoundException("Sender Account not found"));
@@ -125,6 +127,9 @@ public class TransactionServiceImplement implements TransactionService {
 		AccountEntity toAccount = accountRepo.findByAccountNumber(transferRequestDTO.getToAccount())
 				.orElseThrow(() -> new AccountNotFoundException("Reciver Account not found"));
 		
+		if(!fromAccount.getUser().getEmail().equals(email)) {
+			throw new AccessDeniedException("You can't transfer money from this account, it required account holder credentials ");
+		}
 		
 		if (!fromAccount.getStatus().equals(AccountStatus.ACTIVE)) {
 			throw new AccountStatusException("Sender account is not active.");
@@ -164,12 +169,25 @@ public class TransactionServiceImplement implements TransactionService {
 	}
 
 	@Override
-	public List<TransactionResponseDTO> getAccountTransactionHistory(String accountNum) {
-		accountRepo.findByAccountNumber(accountNum)
+	public List<TransactionResponseDTO> getAccountTransactionHistory(String accountNum , Authentication authentication ) {
+		
+		String role = authentication.getAuthorities().stream().findFirst().get().getAuthority();
+	    
+		log.info("get Account Transaction History Current login user role is  "+role);
+		
+		AccountEntity accountDetails = accountRepo.findByAccountNumber(accountNum)
 				.orElseThrow(() -> new AccountNotFoundException("Account not found for transaction history"));
 
-		List<TransactionEntity> history = transactionRepo.findAllTransactionsForAccount(accountNum);
-		return transactionMapper.toDTO(history);
+		if(accountDetails.getUser().getEmail().equals(authentication.getName()) || role.equals("ROLE_ADMIN")) {
+			//record provided
+			log.info("Login by customer");
+			List<TransactionEntity> history = transactionRepo.findAllTransactionsForAccount(accountNum);
+			return transactionMapper.toDTO(history);
+		}
+		else{
+			//throw exception
+			throw  new AccessDeniedException("Sorry you cant see transaction history ");
+		}
 	}
 
 	@Override

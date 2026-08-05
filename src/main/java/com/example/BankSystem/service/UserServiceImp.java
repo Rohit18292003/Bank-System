@@ -2,9 +2,6 @@ package com.example.BankSystem.service;
 
 import java.util.List;
 
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -12,9 +9,10 @@ import org.springframework.transaction.annotation.Transactional;
 import com.example.BankSystem.dto.UserRequestDTO;
 import com.example.BankSystem.dto.UserResponseDTO;
 import com.example.BankSystem.entity.UserEntity;
+import com.example.BankSystem.exception.AccessDeniedException;
 import com.example.BankSystem.exception.AccountAlreadyExitsException;
 import com.example.BankSystem.exception.ResourceNotFoundException;
-import com.example.BankSystem.inter.UserService;
+import com.example.BankSystem.interfaces.UserService;
 import com.example.BankSystem.mapper.UsersMapper;
 import com.example.BankSystem.repos.UsersRepo;
 
@@ -94,7 +92,7 @@ public class UserServiceImp implements UserService {
 	
 	@Override
 	@Transactional
-	public UserResponseDTO updateUserById(Long id, UserRequestDTO newUserData) {
+	public UserResponseDTO updateUserById(Long id, UserRequestDTO newUserData, String mail ) {
 
 	    log.info("Updating user with ID: {}", id);
 
@@ -103,6 +101,10 @@ public class UserServiceImp implements UserService {
 	                log.warn("User not found for update with ID: {}", id);
 	                return new ResourceNotFoundException("User not found with ID: " + id);
 	            });
+	    
+	    if(!customer.getEmail().equals(mail)) {
+	    	throw new AccessDeniedException("You are not allowed to update changes UserID ");
+	    }
 
 	    customer.setName(newUserData.getName());
 	    customer.setEmail(newUserData.getEmail());

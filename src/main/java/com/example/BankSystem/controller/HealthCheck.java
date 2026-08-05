@@ -10,6 +10,7 @@ public class HealthCheck {
 
 	@GetMapping
 	public String healthCheck() {
+		System.out.println("Helath point called");
 		return "ok";
 	}
 }

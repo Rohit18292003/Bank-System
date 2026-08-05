@@ -36,6 +36,7 @@ import com.example.BankSystem.repos.AccountRepo;
 import com.example.BankSystem.repos.TransactionRepo;
 import com.example.BankSystem.repos.UsersRepo;
 import com.example.BankSystem.service.TransactionServiceImplement;
+import org.springframework.security.core.Authentication;
 
 @ExtendWith(MockitoExtension.class)
 public class TransactionServiceTest {
@@ -48,6 +49,9 @@ public class TransactionServiceTest {
 	private AccountRepo accountRepo;
 	@Mock
 	private  UsersRepo usersRepo;
+
+	@Mock
+	private Authentication authentication;
 
 	@InjectMocks
 	private TransactionServiceImplement transactionService;
@@ -177,7 +181,7 @@ public class TransactionServiceTest {
 		when(transactionMapper.toDTO(any(TransactionEntity.class))).thenReturn(transactionResponseDTO);
 
 		//
-		TransactionResponseDTO result = transactionService.withdraw(withdrawRequestDTO);
+		TransactionResponseDTO result = transactionService.withdraw(withdrawRequestDTO,"birajdarrohit56@gmail.com");
 
 		// result
 		Assertions.assertEquals(result.getTransactionType().WITHDRAWAL, TransactionType.WITHDRAWAL);
@@ -193,7 +197,7 @@ public class TransactionServiceTest {
 		when(transactionMapper.toDTO(any(TransactionEntity.class))).thenReturn(transactionResponseDTO);
 
 		// act
-		TransactionResponseDTO result = transactionService.transfer(transferRequestDTO);
+		TransactionResponseDTO result = transactionService.transfer(transferRequestDTO ,"birajdarrohit56@gmail.com");
 
 		// result
 		Assertions.assertEquals(account.getAccountNumber(), result.getFromAccount());
@@ -213,7 +217,7 @@ public class TransactionServiceTest {
 		when(transactionMapper.toDTO(List.of(transactionEntity, transactionEntity1)))
 				.thenReturn(List.of(transactionResponseDTO, transactionResponseDTO1));
 		// act
-		List<TransactionResponseDTO> result = transactionService.getAccountTransactionHistory("745536941664");
+		List<TransactionResponseDTO> result = transactionService.getAccountTransactionHistory("745536941664",authentication);
 		// result
 
 		Assertions.assertEquals(result.size(), 2);

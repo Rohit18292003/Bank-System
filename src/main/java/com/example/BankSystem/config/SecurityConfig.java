@@ -1,5 +1,7 @@
 package com.example.BankSystem.config;
 
+import com.example.BankSystem.filter.JwtAuthenticationFilter;
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -15,17 +17,21 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
 @EnableWebSecurity
-
+@RequiredArgsConstructor
 public class SecurityConfig {
+
+	private final JwtAuthenticationFilter jwtAuthenticationFilter;
+	
 
 	@Bean
 	public SecurityFilterChain apiFilterChain(HttpSecurity http) throws Exception {
 
 		http.csrf(csrf -> csrf.disable())
-		.httpBasic(Customizer.withDefaults())
+
 				.authorizeHttpRequests(auth -> auth
 						.requestMatchers(
 						        "/swagger-ui/**",
@@ -33,11 +39,14 @@ public class SecurityConfig {
 						).permitAll()
 						// public
 						.requestMatchers("/health").permitAll()
+						.requestMatchers("/api/v1/auth/login").permitAll()
 						
 						// register user
 						.requestMatchers(HttpMethod.POST, "/api/v1/users").permitAll()
 						// user apis
 						.requestMatchers(HttpMethod.GET, "/api/v1/users/getUser").hasAnyRole("CUSTOMER", "ADMIN")
+						.requestMatchers(HttpMethod.GET, "/api/v1/users/allUser").hasAnyRole("ADMIN")
+						
 						.requestMatchers(HttpMethod.PUT, "/api/v1/users/**").hasAnyRole("CUSTOMER", "ADMIN")
 						.requestMatchers(HttpMethod.DELETE, "/api/v1/users/**").hasAnyRole("ADMIN")
 
@@ -48,7 +57,7 @@ public class SecurityConfig {
 						.requestMatchers(HttpMethod.DELETE, "/api/v1/accounts/**").hasAnyRole("CUSTOMER", "ADMIN")
 
 						// ADMIN API
-						.requestMatchers(HttpMethod.GET, "/api/v1/users/*/accounts").hasRole("ADMIN")
+						.requestMatchers(HttpMethod.GET, "/api/v1/admin/*/accounts").hasRole("ADMIN")
 						.requestMatchers("/api/v1/users/admin/**").hasRole("ADMIN")
 
 						// transaction apis
@@ -57,8 +66,11 @@ public class SecurityConfig {
 						.requestMatchers(HttpMethod.GET, "/api/v1/users/*/transactions").hasAnyRole("CUSTOMER", "ADMIN")
 						.requestMatchers(HttpMethod.GET, "/api/v1/accounts/*/transactions").hasAnyRole("CUSTOMER", "ADMIN")
 
-						.anyRequest().authenticated())
-				.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
+				.anyRequest().authenticated())
+				
+			.addFilterBefore(jwtAuthenticationFilter,
+						UsernamePasswordAuthenticationFilter.class);
+
 		return http.build();
 	}
 

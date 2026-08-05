@@ -29,6 +29,7 @@ import com.example.BankSystem.repos.AccountRepo;
 import com.example.BankSystem.repos.UsersRepo;
 import com.example.BankSystem.service.AccountServiceImpl;
 import com.example.BankSystem.service.UserServiceImp;
+import org.springframework.security.core.Authentication;
 
 @ExtendWith(MockitoExtension.class)
 class AccountServiceTest {
@@ -41,6 +42,9 @@ class AccountServiceTest {
 	private AccountMapper accountMapper;
 	@InjectMocks
 	private AccountServiceImpl accountService;
+
+	@Mock
+	private Authentication authentication;
 
 	private UserEntity user1;
 	private AccountEntity account1;
@@ -88,7 +92,7 @@ class AccountServiceTest {
 
 		when(accountRepo.save(account3)).thenReturn(account1);
 		// act
-		AccountResponseDTO result = accountService.createAccount(accountReq, 1L);
+		AccountResponseDTO result = accountService.createAccount(accountReq, 1L, authentication);
 
 		
 		verify(accountRepo).save(account3);
@@ -102,7 +106,7 @@ class AccountServiceTest {
 		when(accountMapper.toDto(account1)).thenReturn(accountResp);
 
 		// act
-		 AccountResponseDTO response = accountService.getAccountByAccountNumber("745536941664");
+		 AccountResponseDTO response = accountService.getAccountByAccountNumber("745536941664","birajdarrohit56@gmail.com");
 		// result
 		Assertions.assertEquals("745536941664", response.getAccountNumber());
 
@@ -130,7 +134,7 @@ class AccountServiceTest {
 
 		when(accountMapper.toDto(account3)).thenReturn(accountResp);
 		// act
-		 AccountResponseDTO response = accountService.updateAccountStatus("745536941666", accountReq);
+		 AccountResponseDTO response = accountService.updateAccountStatus("745536941666", accountReq ,"birajdarrohit56@gmail.com");
 
 		Assertions.assertEquals("745536941664", response.getAccountNumber());
 
@@ -140,7 +144,7 @@ class AccountServiceTest {
 	void shouldDeleteAccount() {
 		when(accountRepo.findByAccountNumber("745536941666")).thenReturn(Optional.of(account3));
 		// act
-		accountService.deleteAccount("745536941666");
+		accountService.deleteAccount("745536941666","birajdarrohit56@gmail.com");
 
 		// assertions
 

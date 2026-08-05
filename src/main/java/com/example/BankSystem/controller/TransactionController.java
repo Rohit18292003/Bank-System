@@ -3,6 +3,7 @@ package com.example.BankSystem.controller;
 import java.util.List;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -15,7 +16,7 @@ import com.example.BankSystem.dto.TransactionResponseDTO;
 import com.example.BankSystem.dto.TransferRequestDTO;
 import com.example.BankSystem.dto.WithdrawRequestDTO;
 import com.example.BankSystem.exception.ApiResponse;
-import com.example.BankSystem.inter.TransactionService;
+import com.example.BankSystem.interfaces.TransactionService;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -29,7 +30,7 @@ public class TransactionController {
 
     @PostMapping("/transactions/deposit")
     public ResponseEntity<ApiResponse<TransactionResponseDTO>> deposit(
-            @Valid @RequestBody DepositRequestDTO depositRequestDTO) {
+            @Valid @RequestBody DepositRequestDTO depositRequestDTO ) {
 
         TransactionResponseDTO response =
                 transactionService.deposit(depositRequestDTO);
@@ -42,10 +43,11 @@ public class TransactionController {
 
     @PostMapping("/transactions/withdraw")
     public ResponseEntity<ApiResponse<TransactionResponseDTO>> withdraw(
-            @Valid @RequestBody WithdrawRequestDTO withdrawRequestDTO) {
+            @Valid @RequestBody WithdrawRequestDTO withdrawRequestDTO , Authentication authentication) {
 
+    	
         TransactionResponseDTO response =
-                transactionService.withdraw(withdrawRequestDTO);
+                transactionService.withdraw(withdrawRequestDTO , authentication.getName());
 
         ApiResponse<TransactionResponseDTO> apiResponse =
                 new ApiResponse<>(true, "Money withdrawn successfully", response);
@@ -55,10 +57,10 @@ public class TransactionController {
 
     @PostMapping("/transactions/transfer")
     public ResponseEntity<ApiResponse<TransactionResponseDTO>> transfer(
-            @Valid @RequestBody TransferRequestDTO transferRequestDTO) {
+            @Valid @RequestBody TransferRequestDTO transferRequestDTO ,  Authentication authentication) {
 
         TransactionResponseDTO response =
-                transactionService.transfer(transferRequestDTO);
+                transactionService.transfer(transferRequestDTO , authentication.getName());
 
         ApiResponse<TransactionResponseDTO> apiResponse =
                 new ApiResponse<>(true, "Money transferred successfully", response);
@@ -68,10 +70,11 @@ public class TransactionController {
 
     @GetMapping("/accounts/{accountNumber}/transactions")
     public ResponseEntity<ApiResponse<List<TransactionResponseDTO>>> getAccountHistory(
-            @PathVariable String accountNumber) {
+            @PathVariable String accountNumber, Authentication authentication) {
 
+    	
         List<TransactionResponseDTO> response =
-                transactionService.getAccountTransactionHistory(accountNumber);
+                transactionService.getAccountTransactionHistory(accountNumber , authentication);
 
         ApiResponse<List<TransactionResponseDTO>> apiResponse =
                 new ApiResponse<>(true,

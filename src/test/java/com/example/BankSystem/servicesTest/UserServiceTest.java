@@ -116,7 +116,7 @@ class UserServiceTest {
 		when(userMapper.toDTO(user1)).thenReturn(respUser1);
 
 		// act
-		UserResponseDTO status = userService.updateUserById(1L, newUserRequest);
+		UserResponseDTO status = userService.updateUserById(1L, newUserRequest,"birajdarrohit56@gmail.com");
 
 		// Assertions.assertEquals(HttpStatus.OK, status.get());
 

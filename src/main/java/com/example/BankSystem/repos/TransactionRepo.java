@@ -15,12 +15,12 @@ public interface TransactionRepo extends JpaRepository<TransactionEntity, Long> 
 
 	
 
-	@Query("SELECT t FROM TransactionEntity t WHERE t.fromAccount = :accountNumber OR t.toAccount = :accountNumber")
+	@Query("SELECT t FROM TransactionEntity t WHERE t.fromAccount.accountNumber = :accountNumber OR t.toAccount.accountNumber = :accountNumber")
 	List<TransactionEntity> findAllTransactionsForAccount(@Param("accountNumber") String accountNumber);
 	
 
 
-	@Query("SELECT t FROM TransactionEntity t WHERE t.fromAccount IN :accountNumber OR t.toAccount IN :accountNumber")
+	@Query("SELECT t FROM TransactionEntity t WHERE t.fromAccount.accountNumber IN :accountNumber OR t.toAccount.accountNumber IN :accountNumber")
 	List<TransactionEntity> findTransactionUsingAccountNumber(@Param("accountNumber") List<String> accountNumber);
 	
 
