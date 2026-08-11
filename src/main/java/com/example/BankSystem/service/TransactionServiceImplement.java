@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.example.BankSystem.exception.*;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Service;
 
 import com.example.BankSystem.dto.DepositRequestDTO;
@@ -139,7 +140,7 @@ public class TransactionServiceImplement implements TransactionService {
 		}
 
 
-		if (fromAccount.getBalance().compareTo(transferRequestDTO.getAmount()) <= 0) {
+		if (fromAccount.getBalance().compareTo(transferRequestDTO.getAmount()) < 0) {
 			throw new InsufficientFundsException("Insufficient Balance can't not be transfer");
 		}
 		// sender
@@ -171,7 +172,7 @@ public class TransactionServiceImplement implements TransactionService {
 	@Override
 	public List<TransactionResponseDTO> getAccountTransactionHistory(String accountNum , Authentication authentication ) {
 		
-		String role = authentication.getAuthorities().stream().findFirst().get().getAuthority();
+		String role = authentication.getAuthorities().stream().findFirst().map(GrantedAuthority::getAuthority).orElse("");
 	    
 		log.info("get Account Transaction History Current login user role is  "+role);
 		

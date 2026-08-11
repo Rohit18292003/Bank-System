@@ -3,6 +3,9 @@ package com.example.BankSystem.controller;
 import java.util.List;
 
 import com.example.BankSystem.security.CustomUserDetails;
+
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -26,6 +29,7 @@ import lombok.RequiredArgsConstructor;
 @RestController
 @RequestMapping("/api/v1")
 @RequiredArgsConstructor
+@SecurityRequirement(name = "Bearer Authentication")
 public class AccountController {
 
     private final AccountService accountService;

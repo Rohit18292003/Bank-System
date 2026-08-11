@@ -70,7 +70,7 @@ class AccountServiceTest {
 		user1.getAccounts().add(account2);
 		user1.getAccounts().add(account3);
 
-		accountReq = AccountRequestDTO.builder().accountNumber("745536941666").balance(new BigDecimal("1000")).build();
+		accountReq = AccountRequestDTO.builder().accountNumber("745536941667").balance(new BigDecimal("1000")).build();
 
 		accountResp = AccountResponseDTO.builder().accountId(101L).accountNumber("745536941664")
 				.status(AccountStatus.FROZEN).balance(new BigDecimal("2000")).build();
@@ -85,6 +85,8 @@ class AccountServiceTest {
 
 		when(userRepo.findById(1L)).thenReturn(Optional.of(user1));
 		// when(user1.getAccounts()).thenReturn(List.of(account1, account2));
+	
+		when(authentication.getName()).thenReturn(user1.getEmail());
 		when(accountRepo.existsByAccountNumber(accountReq.getAccountNumber())).thenReturn(false);
 		// when(accountReq.getInitialBalance().compareTo(BigDecimal.ZERO)<0).thenReturn(false);
 		when(accountMapper.toEntity(accountReq)).thenReturn(account3);
@@ -148,7 +150,7 @@ class AccountServiceTest {
 
 		// assertions
 
-		verify(accountRepo).delete(account3);
+		verify(accountRepo).save(account3);
 
 	}
 }

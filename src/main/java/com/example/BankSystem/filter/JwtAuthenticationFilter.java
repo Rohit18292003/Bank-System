@@ -33,6 +33,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         //Read Authorization header
         String authReader = request.getHeader("Authorization");
+        System.out.println("Authorization Header: " + authReader);
 
         // Check if header exists and starts with "Bearer "
         if(authReader == null || !authReader.startsWith("Bearer ")){
@@ -42,9 +43,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         // Extract JWT Token
         String jwt = authReader.substring(7);
+        
+        System.out.println("JWT = " + jwt);
 
-        //Extract Email
         String email = jwtService.extractUsername(jwt);
+        System.out.println("Email from JWT = " + email);
 
         // Authenticate only if not already authenticated
         if(email != null && SecurityContextHolder.getContext().getAuthentication()==null){

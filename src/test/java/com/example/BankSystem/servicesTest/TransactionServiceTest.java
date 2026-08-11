@@ -1,6 +1,7 @@
 package com.example.BankSystem.servicesTest;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -8,6 +9,7 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
@@ -36,8 +38,14 @@ import com.example.BankSystem.repos.AccountRepo;
 import com.example.BankSystem.repos.TransactionRepo;
 import com.example.BankSystem.repos.UsersRepo;
 import com.example.BankSystem.service.TransactionServiceImplement;
-import org.springframework.security.core.Authentication;
 
+import org.springframework.security.authentication.TestingAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import static org.mockito.ArgumentMatchers.anyList;
+
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 @ExtendWith(MockitoExtension.class)
 public class TransactionServiceTest {
 
@@ -50,8 +58,8 @@ public class TransactionServiceTest {
 	@Mock
 	private  UsersRepo usersRepo;
 
-	@Mock
-	private Authentication authentication;
+//	@Mock
+//	private Authentication authentication;
 
 	@InjectMocks
 	private TransactionServiceImplement transactionService;
@@ -162,6 +170,12 @@ public class TransactionServiceTest {
 	            .transactionDate(LocalDateTime.now())
 	            .build();
 	}
+	
+	Authentication authentication = new TestingAuthenticationToken(
+	        "birajdarrohit56@gmail.com",
+	        null,
+	        "ROLE_CUSTOMER"
+	);
 
 	@Test
 	void shouldItDeposit() {
@@ -210,30 +224,37 @@ public class TransactionServiceTest {
 
 	@Test
 	void shouldGetAllTransactionHistory() {
-		// arrange
+	
+   
+	    
 		when(accountRepo.findByAccountNumber("745536941664")).thenReturn(Optional.of(account));
 		when(transactionRepo.findAllTransactionsForAccount("745536941664"))
 				.thenReturn(List.of(transactionEntity, transactionEntity1));
+		
 		when(transactionMapper.toDTO(List.of(transactionEntity, transactionEntity1)))
 				.thenReturn(List.of(transactionResponseDTO, transactionResponseDTO1));
 		// act
 		List<TransactionResponseDTO> result = transactionService.getAccountTransactionHistory("745536941664",authentication);
 		// result
 
-		Assertions.assertEquals(result.size(), 2);
+		Assertions.assertEquals(2, result.size());
 
+	    verify(transactionRepo).findAllTransactionsForAccount("745536941664");
 	}
 	
 	@Test
 	void shouldItgetUserTransactionHistory() {
-		//arrange
-		when(usersRepo.findById(1L)).thenReturn(Optional.of(user1));
-		when(transactionRepo.findTransactionUsingAccountNumber(List.of("745536941664","745536941665"))).thenReturn(List.of(transactionEntity, transactionEntity1));
-		when(transactionMapper.toDTO(List.of(transactionEntity, transactionEntity1)))
-		.thenReturn(List.of(transactionResponseDTO, transactionResponseDTO1));
-		//act
+		// List<SimpleGrantedAuthority> authorities = List.of(new SimpleGrantedAuthority("ROLE_CUSTOMER"));
+
+			when(usersRepo.findById(1L)).thenReturn(Optional.of(user1));
+	 when(transactionRepo.findTransactionUsingAccountNumber(List.of(account.getAccountNumber(),reciverAccount.getAccountNumber() ))).thenReturn(List.of(transactionEntity, transactionEntity1));
+		 when(transactionMapper.toDTO(List.of(transactionEntity, transactionEntity1))).thenReturn(List.of(transactionResponseDTO , transactionResponseDTO1));
+			
+		 //action
 		List<TransactionResponseDTO> result = transactionService.getUserTransactionHistory(1L);
+	
 		//result
+		 
 
 		Assertions.assertEquals(result.size(), 2);
 	}

@@ -21,6 +21,7 @@ import com.example.BankSystem.exception.ApiResponse;
 import com.example.BankSystem.interfaces.UserService;
 import com.example.BankSystem.security.CustomUserDetails;
 
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -29,6 +30,7 @@ import lombok.extern.slf4j.Slf4j;
 @RequestMapping("/api/v1/users")
 @RequiredArgsConstructor
 @Slf4j
+@SecurityRequirement(name = "BearerAuth")
 public class UserController {
 
     private final UserService userService;
@@ -50,7 +52,7 @@ public class UserController {
     	log.info("get userData method execute inside user controller ");
     	
         ApiResponse<UserResponseDTO> apiResponse =
-                new ApiResponse<>(true, "User fetch ed successfully",
+                new ApiResponse<>(true, "User fetched successfully",
                         userService.getUserByEmail(authentication.getName()));
 
         return ResponseEntity.ok(apiResponse);
