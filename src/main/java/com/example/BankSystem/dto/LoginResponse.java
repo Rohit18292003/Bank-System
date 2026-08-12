@@ -1,10 +1,18 @@
 package com.example.BankSystem.dto;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
 @Data
 @AllArgsConstructor
+@Schema(description = "Response returned after successful login")
 public class LoginResponse {
-    String token;
+
+    @Schema(
+            description = "JWT authentication token",
+            example = "eyJhbGciOiJIUzI1NiJ9..."
+    )
+    private String token;
 }
