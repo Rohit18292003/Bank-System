@@ -4,7 +4,12 @@ import java.util.List;
 
 import com.example.BankSystem.security.CustomUserDetails;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -20,7 +25,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.example.BankSystem.dto.AccountRequestDTO;
 import com.example.BankSystem.dto.AccountResponseDTO;
-import com.example.BankSystem.exception.ApiResponse;
+import com.example.BankSystem.exception.ApiResponsee;
+
 import com.example.BankSystem.interfaces.AccountService;
 
 import jakarta.validation.Valid;
@@ -30,64 +36,113 @@ import lombok.RequiredArgsConstructor;
 @RequestMapping("/api/v1")
 @RequiredArgsConstructor
 @SecurityRequirement(name = "Bearer Authentication")
+@Tag(name = "Account API", description = "APIs for managing bank accounts")
 public class AccountController {
 
     private final AccountService accountService;
 
+    @Operation(
+    	    summary = "Create Account",
+    	    description = "Creates a new bank account for the specified user."
+    	)
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "Account created successfully"),
+        @ApiResponse(responseCode = "400", description = "Invalid request"),
+        @ApiResponse(responseCode = "401", description = "Unauthorized"),
+        @ApiResponse(responseCode = "404", description = "User not found")
+    })
     @PostMapping("/users/{userId}/accounts")
-    public ResponseEntity<ApiResponse<AccountResponseDTO>> create(
+    public ResponseEntity<ApiResponsee<AccountResponseDTO>> create(
             @Valid @RequestBody AccountRequestDTO requestDTO,
-            @PathVariable Long userId ,Authentication authentication) {
+            @Parameter(description = "User ID", example = "1")
+            @PathVariable Long userId,
+            Authentication authentication) {
 
        AccountResponseDTO response = accountService.createAccount(requestDTO, userId,authentication);
 
-        ApiResponse<AccountResponseDTO> apiResponse =
-                new ApiResponse<>(true, "Account created successfully", response);
+        ApiResponsee<AccountResponseDTO> apiResponse =
+                new ApiResponsee<>(true, "Account created successfully", response);
 
         return ResponseEntity.ok(apiResponse);
     }
 
-    @GetMapping("/admin/{userId}/accounts")
-    public ResponseEntity<ApiResponse<List<AccountResponseDTO>>> getUserAllAccount(
+    
+    @Operation(
+    	    summary = "Get All Accounts",
+    	    description = "Returns all accounts belonging to the specified user."
+    	)
+    	@ApiResponses({
+    	    @ApiResponse(responseCode = "200", description = "Accounts fetched successfully"),
+    	    @ApiResponse(responseCode = "404", description = "User not found")
+    	})
+    	@GetMapping("/admin/{userId}/accounts")
+    public ResponseEntity<ApiResponsee<List<AccountResponseDTO>>> getUserAllAccount(
             @PathVariable Long userId) {
 
         List<AccountResponseDTO> response =
                 accountService.getUsersAllAccounts(userId);
 
-        ApiResponse<List<AccountResponseDTO>> apiResponse =
-                new ApiResponse<>(true, "User accounts fetched successfully", response);
+        ApiResponsee<List<AccountResponseDTO>> apiResponse =
+                new ApiResponsee<>(true, "User accounts fetched successfully", response);
 
         return ResponseEntity.ok(apiResponse);
     }
 
+    @Operation(
+    	    summary = "Get Account",
+    	    description = "Returns the authenticated user's account by account number."
+    	)
+    	@ApiResponses({
+    	    @ApiResponse(responseCode = "200", description = "Account fetched successfully"),
+    	    @ApiResponse(responseCode = "401", description = "Unauthorized"),
+    	    @ApiResponse(responseCode = "404", description = "Account not found")
+    	})
     @GetMapping("/accounts/{accountNumber}")
-    public ResponseEntity<ApiResponse<AccountResponseDTO>> getByAccountNum(
+    public ResponseEntity<ApiResponsee<AccountResponseDTO>> getByAccountNum(
             @PathVariable String accountNumber ,@AuthenticationPrincipal CustomUserDetails userDetails) {
 
 
         AccountResponseDTO response =
                 accountService.getAccountByAccountNumber(accountNumber , userDetails.getUsername());
 
-        ApiResponse<AccountResponseDTO> apiResponse =
-                new ApiResponse<>(true, "Account fetched successfully", response);
+        ApiResponsee<AccountResponseDTO> apiResponse =
+                new ApiResponsee<>(true, "Account fetched successfully", response);
 
         return ResponseEntity.ok(apiResponse);
     }
-
+    
+    
+    @Operation(
+    	    summary = "Update Account",
+    	    description = "Updates the account status of the authenticated user's account."
+    	)
+    	@ApiResponses({
+    	    @ApiResponse(responseCode = "200", description = "Account updated successfully"),
+    	    @ApiResponse(responseCode = "400", description = "Invalid request"),
+    	    @ApiResponse(responseCode = "404", description = "Account not found")
+    	})
     @PutMapping("/accounts/{accountNumber}")
-    public ResponseEntity<ApiResponse<AccountResponseDTO>> update(
+    public ResponseEntity<ApiResponsee<AccountResponseDTO>> update(
             @PathVariable String accountNumber,
             @Valid @RequestBody AccountRequestDTO requestDTO ,@AuthenticationPrincipal CustomUserDetails userDetails ) {
 
         AccountResponseDTO response =
                 accountService.updateAccountStatus(accountNumber, requestDTO, userDetails.getUsername());
 
-        ApiResponse<AccountResponseDTO> apiResponse =
-                new ApiResponse<>(true, "Account updated successfully", response);
+        ApiResponsee<AccountResponseDTO> apiResponse =
+                new ApiResponsee<>(true, "Account updated successfully", response);
 
         return ResponseEntity.ok(apiResponse);
     }
 
+    @Operation(
+    	    summary = "Delete Account",
+    	    description = "Deletes the authenticated user's account."
+    	)
+    	@ApiResponses({
+    	    @ApiResponse(responseCode = "204", description = "Account deleted successfully"),
+    	    @ApiResponse(responseCode = "404", description = "Account not found")
+    	})
     @DeleteMapping("/accounts/{accountNumber}")
     public ResponseEntity<Void> delete(@PathVariable String accountNumber, @AuthenticationPrincipal CustomUserDetails userDetails) {
 

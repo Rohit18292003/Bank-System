@@ -17,7 +17,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.example.BankSystem.dto.UserRequestDTO;
 import com.example.BankSystem.dto.UserResponseDTO;
-import com.example.BankSystem.exception.ApiResponse;
+
+import com.example.BankSystem.exception.ApiResponsee;
 import com.example.BankSystem.interfaces.UserService;
 import com.example.BankSystem.security.CustomUserDetails;
 
@@ -36,23 +37,23 @@ public class UserController {
     private final UserService userService;
 
     @PostMapping
-    public ResponseEntity<ApiResponse<UserResponseDTO>> createUser(
+    public ResponseEntity<ApiResponsee<UserResponseDTO>> createUser(
             @Valid @RequestBody UserRequestDTO users) {
     		
     	UserResponseDTO response = userService.createUser(users);
-        ApiResponse<UserResponseDTO> apiResponse =
-                new ApiResponse<>(true, "User created successfully", response);
+        ApiResponsee<UserResponseDTO> apiResponse =
+                new ApiResponsee<>(true, "User created successfully", response);
 
         return ResponseEntity.ok(apiResponse);
     }
 
     @GetMapping("/getUser") 
-    public ResponseEntity<ApiResponse<UserResponseDTO>> getUserData(Authentication authentication) {
+    public ResponseEntity<ApiResponsee<UserResponseDTO>> getUserData(Authentication authentication) {
 
     	log.info("get userData method execute inside user controller ");
     	
-        ApiResponse<UserResponseDTO> apiResponse =
-                new ApiResponse<>(true, "User fetched successfully",
+        ApiResponsee<UserResponseDTO> apiResponse =
+                new ApiResponsee<>(true, "User fetched successfully",
                         userService.getUserByEmail(authentication.getName()));
 
         return ResponseEntity.ok(apiResponse);
@@ -64,14 +65,14 @@ public class UserController {
     }
 
     @PutMapping("/{userId}")
-    public ResponseEntity<ApiResponse<UserResponseDTO>> updateUser(
+    public ResponseEntity<ApiResponsee<UserResponseDTO>> updateUser(
             @PathVariable Long userId,
             @Valid @RequestBody UserRequestDTO users ,@AuthenticationPrincipal CustomUserDetails userDetails ) {
 
         UserResponseDTO response = userService.updateUserById(userId, users, userDetails.getUsername());
 
-        ApiResponse<UserResponseDTO> apiResponse =
-                new ApiResponse<>(true, "User updated successfully", response);
+        ApiResponsee<UserResponseDTO> apiResponse =
+                new ApiResponsee<>(true, "User updated successfully", response);
 
         return ResponseEntity.ok(apiResponse);
     }
@@ -84,10 +85,10 @@ public class UserController {
     }
 
     @GetMapping("/allUser")
-    public ResponseEntity<ApiResponse<List<UserResponseDTO>>> getAllUsers() {
+    public ResponseEntity<ApiResponsee<List<UserResponseDTO>>> getAllUsers() {
 
-        ApiResponse<List<UserResponseDTO>> apiResponse =
-                new ApiResponse<>(true, "All users fetched successfully",
+        ApiResponsee<List<UserResponseDTO>> apiResponse =
+                new ApiResponsee<>(true, "All users fetched successfully",
                         userService.getAllUser());
 
         return ResponseEntity.ok(apiResponse);

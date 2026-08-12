@@ -16,6 +16,8 @@ import java.util.function.Function;
 @Service
 @Slf4j
 public class JwtService {
+	
+	//secret key return inside properties
     @Value("${jwt.secret}")
     private String secretKey;
 

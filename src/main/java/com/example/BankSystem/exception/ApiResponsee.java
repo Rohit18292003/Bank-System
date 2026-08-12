@@ -11,7 +11,7 @@ import lombok.Setter;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class ApiResponse<T> {
+public class ApiResponsee<T> {
 
     private boolean success;
     private String message;

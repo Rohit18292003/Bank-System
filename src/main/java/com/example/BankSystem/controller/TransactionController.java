@@ -15,7 +15,8 @@ import com.example.BankSystem.dto.DepositRequestDTO;
 import com.example.BankSystem.dto.TransactionResponseDTO;
 import com.example.BankSystem.dto.TransferRequestDTO;
 import com.example.BankSystem.dto.WithdrawRequestDTO;
-import com.example.BankSystem.exception.ApiResponse;
+
+import com.example.BankSystem.exception.ApiResponsee;
 import com.example.BankSystem.interfaces.TransactionService;
 
 import jakarta.validation.Valid;
@@ -29,55 +30,55 @@ public class TransactionController {
     private final TransactionService transactionService;
 
     @PostMapping("/transactions/deposit")
-    public ResponseEntity<ApiResponse<TransactionResponseDTO>> deposit(
+    public ResponseEntity<ApiResponsee<TransactionResponseDTO>> deposit(
             @Valid @RequestBody DepositRequestDTO depositRequestDTO ) {
 
         TransactionResponseDTO response =
                 transactionService.deposit(depositRequestDTO);
 
-        ApiResponse<TransactionResponseDTO> apiResponse =
-                new ApiResponse<>(true, "Money deposited successfully", response);
+        ApiResponsee<TransactionResponseDTO> apiResponse =
+                new ApiResponsee<>(true, "Money deposited successfully", response);
 
         return ResponseEntity.ok(apiResponse);
     }
 
     @PostMapping("/transactions/withdraw")
-    public ResponseEntity<ApiResponse<TransactionResponseDTO>> withdraw(
+    public ResponseEntity<ApiResponsee<TransactionResponseDTO>> withdraw(
             @Valid @RequestBody WithdrawRequestDTO withdrawRequestDTO , Authentication authentication) {
 
     	
         TransactionResponseDTO response =
                 transactionService.withdraw(withdrawRequestDTO , authentication.getName());
 
-        ApiResponse<TransactionResponseDTO> apiResponse =
-                new ApiResponse<>(true, "Money withdrawn successfully", response);
+        ApiResponsee<TransactionResponseDTO> apiResponse =
+                new ApiResponsee<>(true, "Money withdrawn successfully", response);
 
         return ResponseEntity.ok(apiResponse);
     }
 
     @PostMapping("/transactions/transfer")
-    public ResponseEntity<ApiResponse<TransactionResponseDTO>> transfer(
+    public ResponseEntity<ApiResponsee<TransactionResponseDTO>> transfer(
             @Valid @RequestBody TransferRequestDTO transferRequestDTO ,  Authentication authentication) {
 
         TransactionResponseDTO response =
                 transactionService.transfer(transferRequestDTO , authentication.getName());
 
-        ApiResponse<TransactionResponseDTO> apiResponse =
-                new ApiResponse<>(true, "Money transferred successfully", response);
+        ApiResponsee<TransactionResponseDTO> apiResponse =
+                new ApiResponsee<>(true, "Money transferred successfully", response);
 
         return ResponseEntity.ok(apiResponse);
     }
 
     @GetMapping("/accounts/{accountNumber}/transactions")
-    public ResponseEntity<ApiResponse<List<TransactionResponseDTO>>> getAccountHistory(
+    public ResponseEntity<ApiResponsee<List<TransactionResponseDTO>>> getAccountHistory(
             @PathVariable String accountNumber, Authentication authentication) {
 
     	
         List<TransactionResponseDTO> response =
                 transactionService.getAccountTransactionHistory(accountNumber , authentication);
 
-        ApiResponse<List<TransactionResponseDTO>> apiResponse =
-                new ApiResponse<>(true,
+        ApiResponsee<List<TransactionResponseDTO>> apiResponse =
+                new ApiResponsee<>(true,
                         "Account transaction history fetched successfully",
                         response);
 
@@ -85,14 +86,14 @@ public class TransactionController {
     }
 
     @GetMapping("/users/{userId}/transactions")
-    public ResponseEntity<ApiResponse<List<TransactionResponseDTO>>> getUserAccountHistory(
+    public ResponseEntity<ApiResponsee<List<TransactionResponseDTO>>> getUserAccountHistory(
             @PathVariable Long userId) {
 
         List<TransactionResponseDTO> response =
                 transactionService.getUserTransactionHistory(userId);
 
-        ApiResponse<List<TransactionResponseDTO>> apiResponse =
-                new ApiResponse<>(true,
+        ApiResponsee<List<TransactionResponseDTO>> apiResponse =
+                new ApiResponsee<>(true,
                         "User transaction history fetched successfully",
                         response);
 
