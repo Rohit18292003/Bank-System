@@ -8,7 +8,6 @@ import org.springframework.stereotype.Repository;
 import com.example.BankSystem.entity.UserEntity;
 
 @Repository
-
 public interface UsersRepo extends JpaRepository<UserEntity, Long> {
 
 	boolean existsByEmail(String mail);
@@ -16,7 +15,6 @@ public interface UsersRepo extends JpaRepository<UserEntity, Long> {
 	boolean existsByMobile(String mobile);
 
 	Optional<UserEntity> findByEmail(String mail);
-	Optional<UserEntity> findById(Long id);
 
 
 }
